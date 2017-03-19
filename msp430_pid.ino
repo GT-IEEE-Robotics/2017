@@ -1,3 +1,5 @@
+// for energia targetting msp430g2553
+
 #define G_LED P1_0
 
 #define M_PWM P1_6
