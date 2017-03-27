@@ -1,14 +1,15 @@
-// for energia targetting msp430g2553
-
 #define G_LED P1_0
 
-#define M_PWM P1_6
-#define M_DIR P2_5
 
-#define QUAD_A P2_1
-#define QUAD_B P2_2
+//m1: pwm: p2_4, dir: p2_1
+//m2: pwm: p2_6, dir: p2_7
+#define M_PWM P2_6
+#define M_DIR P2_7
 
-#define SW P1_3
+//m1: a: p1_3, b: p1_4
+//m2: a: p2_2, b: o2_3
+#define QUAD_A P2_2
+#define QUAD_B P2_3
 
 #define GRAPH_MILLIS_PERIOD 10
 #define CTRL_MICROS_PERIOD 10
@@ -37,14 +38,14 @@ unsigned long ctrl_last_micros = 0;
 void setup() {                
   Serial.begin(9600);
   pinMode(G_LED, OUTPUT);
-  digitalWrite(G_LED, LOW);
+  digitalWrite(G_LED, HIGH);
   
   pinMode(M_PWM, OUTPUT);     
   pinMode(M_DIR, OUTPUT);
   pinMode(QUAD_A, INPUT);
   pinMode(QUAD_B, INPUT);
 
-  pinMode(SW, INPUT_PULLUP);
+  //pinMode(SW, INPUT_PULLUP);
 
   analogWrite(M_PWM, 0);
   digitalWrite(M_DIR, LOW);
@@ -66,8 +67,9 @@ void setup() {
 
 // the loop routine runs over and over again forever:
 void loop() {
+  
 
-  if (digitalRead(SW) == LOW && !done) {
+  if (!done) {
 
     if (micros() - ctrl_last_micros > CTRL_MICROS_PERIOD) {
 
@@ -96,21 +98,15 @@ void loop() {
   else { 
     analogWrite(M_PWM, 0);
     digitalWrite(M_DIR, LOW);
+    digitalWrite(G_LED, LOW);
   }
   
   if (millis() - graph_last_millis > GRAPH_MILLIS_PERIOD) {
     Serial.println(steps);
     graph_last_millis = millis();
   }
+  
 }
-
-// warning: lean bit magic
-// m1_state_number: enum between 0, 1, 2, and 3
-// isr_quad_a() is isr when quadrature input "a" experiences an edge
-// isr_quad_b() is isr when quadrature input "b" experiences an edge
-// code below updates the state machine based on those isr triggers
-// look at handy dandy picture: http://www.labbookpages.co.uk/circuits/files/wheelEncoder/stateMachine.png
-// input A is red, input B is green, "state A" is state number 0, "state B" is state number 1, and so on
 
 void isr_quad_a() {
   steps += (0 - (m1_state_number & 1)) | 1;
