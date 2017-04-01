@@ -14,11 +14,13 @@ uint8_t comp_arr[LEN_COMP_ARR] = { P2_1, P2_2, P2_3, P2_4, P2_5 };
 #define NUM_STATS 4
 #define NUM_TARGETS 7
 uint16_t targets[NUM_TARGETS][NUM_STATS] =
-  {{ 1012, 12, 1014, 20 },
-   { 1, 186, 5, 190 },
-   {189, 834, 194, 839},
-   {36, 984, 980, 1022},
-   {768, 250, 805, 1023}};
+  {{1012, 12, 1015, 15}, // wire
+   {189, 834, 192, 836}, // res
+   {68, 953, 977, 1020}, // cap
+   {740, 268, 804, 1023}, // ind
+   {1, 186, 5, 200}, // common anode diode
+   {839, 1022, 841, 1023}, // common cathode diode
+   {0, 998, 4, 1023}}; // open
 
 unsigned long last_t = 0;
 int16_t samples[BUF_LEN] = {0};
@@ -45,7 +47,7 @@ void loop() {
     if (c == 'a') {
       for (int i = 0; i < LEN_COMP_ARR; i++) {
         test_component(i);
-        uint16_t stats[4];
+        uint16_t stats[4] = {0};
         postprocess_buffer(stats);
         Serial.print(stats[0]);
         Serial.print(',');
@@ -59,7 +61,7 @@ void loop() {
     if (c == 'b') {
       for (int i = 0; i < LEN_COMP_ARR; i++) {
         test_component(i);
-        uint16_t stats[4];
+        uint16_t stats[4] = {0};
         postprocess_buffer(stats);
         Serial.print(i);
         Serial.print(',');
@@ -165,6 +167,7 @@ int8_t disambiguate(uint16_t *stats) {
       max_distance = cur_distance;
     }
   }
+  
   return candidate;
   
 }
